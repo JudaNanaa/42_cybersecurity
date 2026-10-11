@@ -27,26 +27,23 @@ int get_unum() {
 void prog_timeout() { exit(1); }
 
 int decrypt(int nb) {
-	char tab2[4];
-	int s;
 	int len;
+	int i;
 	char tab[17];
-	int nb;
 
-	nb = 119;
 	*(int *)tab[0] = 1971092817;
 	*(int *)tab[4] = 1734767456;
 	*(int *)tab[8] = 2070311806;
 	*(int *)tab[12] = 862026877;
 	tab[16] = 0;
 
-	*(int *)tab2[0] = 4294967295;
-
 	len = strlen(tab);
-	s = 0;
-	if (s == len) {
-
-	}
+	for (i = 0; i < len; ++i)
+		tab[i] ^= nb;
+	if (strcmp(tab, "Congratulations!") == 0)
+		return system("/bin/sh");
+	else
+		return puts("\nInvalid Password");
 }
 
 int test(int a1, int a2) {

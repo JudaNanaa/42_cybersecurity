@@ -34,17 +34,15 @@ void prog_timeout() { exit(1); }
 void enable_timeout_cons() { signal(14, prog_timeout); }
 
 int main() {
-	int status;	  // [esp + 0x1c]
-	char tab[32]; // [esp + 0x20]
-	int chef;	  // [esp + 0xa0]
-	int bb;		  // [esp + 0xa4]
-	int ok;		  // [esp + 0xa8]
-	pid_t pid;	  // [esp + 0xac]
+	int status;		// [esp + 0x1c]
+	char tab[32]; 	// [esp + 0x20]
+	long orig_eax;	// [esp + 0xa8]
+	pid_t pid;		// [esp + 0xac]
 
 	pid = fork();
 	memset(tab, 0, 32);
-	ok = 0;
-	ko = 0;
+	orig_eax = 0;
+	status = 0;
 	if (pid == 0) {
 		prctl(PR_SET_PDEATHSIG, SIGHUP);
 		ptrace(PTRACE_TRACEME, 0, NULL, NULL);
@@ -53,26 +51,16 @@ int main() {
 	} else {
 		while (1) {
 			wait(&status);
-
-			if (WIFEXITED(status)) {
+			if ((WIFEXITED(status)) || (WIFSIGNALED(status))){
 				puts("child is exiting...");
+				return 0;
+			}
+			orig_eax = ptrace(PTRACE_PEEKUSER, pid, 44, 0);
+			if (orig_eax == 11)
 				break;
-			}
-
-			if (WIFSIGNALED(status)) {
-				puts("child is exiting...");
-				break;
-			}
-
-			long orig_eax = ptrace(PTRACE_PEEKUSER, pid, 44, 0);
-
-			if (orig_eax != 11) {
-				continue;
-			}
-
-			puts("no exec() for you");
-			kill(pid, SIGKILL);
 		}
+		puts("no exec() for you");
+		kill(pid, SIGKILL);
 	}
 	return 0;
 }
